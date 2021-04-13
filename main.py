@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 import sys
+import numpy as np
 
 
 def getMutationCompName():
@@ -11,9 +12,10 @@ def main(argv):
     # open the total monitored mutations and the compress mutation tables
     monitored = pd.read_csv(argv[0])
     compress = pd.read_csv(argv[1])
+   # monitored.replace("No Coverage",0,inplace=True)
     # choose tha samples columns from the monitored mutations file
     samplesList = monitored[[col for col in monitored if
-                             col.startswith('Env') or col.startswith('nv') or col.startswith('p-') or col.startswith(
+                             col.startswith('Env') or col.startswith('nv') or col.startswith('env') or col.startswith('p-') or col.startswith(
                                  'P-')]]
     # iterate over each sample from the sample list
     for i, sample in enumerate(samplesList):
@@ -29,8 +31,6 @@ def main(argv):
 
             else:
                 try:
-                    if mutName == 'D215G':
-                        a = 3
                     # Delete mutations
                     if "Deletion" in monitored.iloc[index]["type"]:
                         # Regex to separate part of the mutation
@@ -41,7 +41,11 @@ def main(argv):
                             if itemRegexed[1] == mutRegexed[1]:
                                 break
                         # the average of the first two nucleotides freq
-                        delMean = monitored[[sample]].iloc[[index, index + 1]].mean(axis=0).values
+                        aa= monitored[[sample]].iloc[[index]]
+                        ba=monitored[[sample]].iloc[[index+1]]
+                        delMean = monitored[[sample]].iloc[[index, index + 1]].mean(axis=1).values.sum()/2
+                        if delMean != delMean:
+                            delMean="No Coverage"
                         # prev is used to move forward the index in mutations like sgf3xxx-3xxxx
                         if mutName == prev:
                             delIndex += 1
@@ -49,7 +53,7 @@ def main(argv):
                         else:
                             delIndex = 0
                         # assign the average value in compress index location
-                        compress.at[compi, sample] = float(delMean)
+                        compress.at[compi, sample] = delMean
                         # skip on the next two nucleotide of the same mutation
                         [next(it, None) for _ in range(2)]
                     else:
