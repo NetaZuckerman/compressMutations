@@ -12,10 +12,12 @@ def main(argv):
     # open the total monitored mutations and the compress mutation tables
     monitored = pd.read_csv(argv[0])
     compress = pd.read_csv(argv[1])
-   # monitored.replace("No Coverage",0,inplace=True)
+    # missing=[]
+    # monitored.replace("No Coverage",0,inplace=True)
     # choose tha samples columns from the monitored mutations file
     samplesList = monitored[[col for col in monitored if
-                             col.startswith('Env') or col.startswith('nv') or col.startswith('env') or col.startswith('p-') or col.startswith(
+                             col.startswith('Env') or col.startswith('nv') or col.startswith('env') or col.startswith(
+                                 'p-') or col.startswith(
                                  'P-')]]
     # iterate over each sample from the sample list
     for i, sample in enumerate(samplesList):
@@ -26,13 +28,12 @@ def main(argv):
         delIndex = 0
         # iterate over mutations per sample
         for index, mutName in it:
-            if mutName == "27338Del":
+            if "B.1.526.1 - New york" in monitored.iloc[index]["lineage"]:
                 pass
-
             else:
                 try:
                     # Delete mutations
-                    if "Deletion" in monitored.iloc[index]["type"]:
+                    if "Deletion" in monitored.iloc[index]["type"] and mutName[0].isupper():
                         # Regex to separate part of the mutation
                         mutRegexed = re.findall('\d+|\D+', mutName)
                         # iterate over all mutations in the compress table to get the index of the desired mutation
@@ -41,11 +42,11 @@ def main(argv):
                             if itemRegexed[1] == mutRegexed[1]:
                                 break
                         # the average of the first two nucleotides freq
-                        aa= monitored[[sample]].iloc[[index]]
-                        ba=monitored[[sample]].iloc[[index+1]]
-                        delMean = monitored[[sample]].iloc[[index, index + 1]].mean(axis=1).values.sum()/2
+                        aa = monitored[[sample]].iloc[[index]]
+                        ba = monitored[[sample]].iloc[[index + 1]]
+                        delMean = monitored[[sample]].iloc[[index, index + 1]].mean(axis=1).values.sum() / 2
                         if delMean != delMean:
-                            delMean="No Coverage"
+                            delMean = "No Coverage"
                         # prev is used to move forward the index in mutations like sgf3xxx-3xxxx
                         if mutName == prev:
                             delIndex += 1
@@ -68,6 +69,10 @@ def main(argv):
                 # In case of error
                 except:
                     print("index: " + str(index) + " is empty\n")
+                    # missing.append(mutName)
+
+    # aa=pd.DataFrame(data=set(missing))
+    # aa.to_csv("missing.csv")
     compress.to_csv("aftercompress.csv")
 
 
