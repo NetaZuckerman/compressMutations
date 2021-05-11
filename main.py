@@ -28,7 +28,7 @@ def main(argv):
         delIndex = 0
         # iterate over mutations per sample
         for index, mutName in it:
-            if "B.1.526.1 - New york" in monitored.iloc[index]["lineage"]:
+            if "B.1.526.1 - New york" in str(monitored.iloc[index]["lineage"]):
                 pass
             else:
                 try:
@@ -37,10 +37,12 @@ def main(argv):
                         # Regex to separate part of the mutation
                         mutRegexed = re.findall('\d+|\D+', mutName)
                         # iterate over all mutations in the compress table to get the index of the desired mutation
-                        for compi, item in enumerate(compress["Mutation"]):
-                            itemRegexed = re.findall('\d+|\D+', item)
-                            if itemRegexed[1] == mutRegexed[1]:
-                                break
+                   #     for compi, item in enumerate(compress["Mutation"]):
+                   #         itemRegexed = re.findall('\d+|\D+', item)
+                   #         if itemRegexed[1] == mutRegexed[1] and itemRegexed[0] == mutRegexed[0]:
+                    #            break
+                        mutCompressedName = ''.join([i for i in list(compress["Mutation"]) if i.startswith(mutName)])
+                        compi = list(compress["Mutation"]).index(mutCompressedName)
                         # the average of the first two nucleotides freq
                         aa = monitored[[sample]].iloc[[index]]
                         ba = monitored[[sample]].iloc[[index + 1]]
@@ -48,27 +50,26 @@ def main(argv):
                         if delMean != delMean:
                             delMean = "No Coverage"
                         # prev is used to move forward the index in mutations like sgf3xxx-3xxxx
-                        if mutName == prev:
-                            delIndex += 1
-                            compi += delIndex
                         else:
                             delIndex = 0
                         # assign the average value in compress index location
                         compress.at[compi, sample] = delMean
                         # skip on the next two nucleotide of the same mutation
                         [next(it, None) for _ in range(2)]
-                    else:
+                    elif "Deletion" not in monitored.iloc[index]["type"]:
                         # Point Mutations (only the Non-Synonymous)
                         if re.search("^(?!Synonymous).*$", monitored.iloc[index]["type"]):
-                            for compi, item in enumerate(compress["Mutation"]):
-                                if mutName in item:
-                                    break
+                            #for compi, item in enumerate(compress["Mutation"]):
+                             #   if mutName in item:
+                              #      break
+                            mutCompressedName = ''.join([i for i in list(compress["Mutation"]) if i.startswith(mutName)])
+                            compi=list(compress["Mutation"]).index(mutCompressedName)
                             valuePerMutation = monitored.iloc[index][sample]
                             compress.at[compi, sample] = valuePerMutation
-                    prev = mutName
                 # In case of error
                 except:
-                    print("index: " + str(index) + " is empty\n")
+                    print("There is no mutation: " + mutName + " in the compressed table, lineage: " +
+                          monitored.iloc[index]["lineage"] + "\n")
                     # missing.append(mutName)
 
     # aa=pd.DataFrame(data=set(missing))
