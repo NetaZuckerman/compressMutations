@@ -23,7 +23,7 @@ def main(argv):
     # iterate over each sample from the sample list
     for i, sample in enumerate(samplesList):
         # it = iterator over the mutations in the AA column
-        it = enumerate(monitored["AA"])
+        it = enumerate(monitored["variant"])
         # open an empty column with the name of the sample in title
         compress[sample] = ""
         delIndex = 0
@@ -34,7 +34,7 @@ def main(argv):
             else:
                 try:
                     # Delete mutations
-                    if "Deletion" in monitored.iloc[index]["type"] and mutName[0].isupper():
+                    if "deletion" in monitored.iloc[index]["Mutation type"] and mutName[0].isupper():
                         # Regex to separate part of the mutation
                         mutRegexed = re.findall('\d+|\D+', mutName)
                         # iterate over all mutations in the compress table to get the index of the desired mutation
@@ -57,9 +57,9 @@ def main(argv):
                         compress.at[compi, sample] = delMean
                         # skip on the next two nucleotide of the same mutation
                         [next(it, None) for _ in range(2)]
-                    elif "Deletion" not in monitored.iloc[index]["type"]:
+                    elif "Deletion" not in monitored.iloc[index]["Mutation type"]:
                         # Point Mutations (only the Non-Synonymous)
-                        if re.search("^(?!Synonymous).*$", monitored.iloc[index]["type"]):
+                        if re.search("^(?!Synonymous).*$", monitored.iloc[index]["Mutation type"]):
                             #for compi, item in enumerate(compress["Mutation"]):
                              #   if mutName in item:
                               #      break
