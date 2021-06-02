@@ -12,7 +12,7 @@ def main(argv):
     # open the total monitored mutations and the compress mutation tables
     monitored = pd.read_csv(argv[0])
     compress = pd.read_csv(argv[1])
-    logfileset=set()
+    logfileset={}
     # missing=[]
     # monitored.replace("No Coverage",0,inplace=True)
     # choose tha samples columns from the monitored mutations file
@@ -70,13 +70,13 @@ def main(argv):
                 # In case of error
                 except:
                     logfileset.add("There is no mutation: " + mutName + " in the compressed table, lineage: " +
-                          monitored.iloc[index]["lineage"] + "\n")
+                          monitored.iloc[index]["lineage"] + "\n":None)
                     # missing.append(mutName)
 
     # aa=pd.DataFrame(data=set(missing))
     # aa.to_csv("missing.csv")
     f = open("logfile.txt", "w")
-    for x in logfileset:
+    for x in logfileset.keys():
         f.write(x)
     f.close()
     print("compressed table is ready\nLog file is ready")
