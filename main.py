@@ -69,8 +69,8 @@ def main(argv):
                             compress.at[compi, sample] = valuePerMutation
                 # In case of error
                 except:
-                    logfileset.add("There is no mutation: " + mutName + " in the compressed table, lineage: " +
-                          monitored.iloc[index]["lineage"] + "\n":None)
+                    logfileset.update({"(There is no mutation: " + mutName + " in the compressed table, lineage: " +
+                          monitored.iloc[index]["lineage"] + "\n"):None})
                     # missing.append(mutName)
 
     # aa=pd.DataFrame(data=set(missing))
